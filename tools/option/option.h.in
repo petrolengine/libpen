@@ -1,0 +1,22 @@
+#pragma once
+
+#include "platform.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define PEN_OPTION_NAME(name) pen_option_ ## name
+#define PEN_OPTION_ENUM_NAME(name) pen_option_enum_ ## name
+#define PEN_OPTION_STRUCT_NAME(name) pen_option_struct_ ## name
+
+// User defined enum types
+%(OPTION_ENUM_TYPE)s
+// User defined struct types
+%(OPTION_STRUCT_TYPE)s
+// Option data
+%(OPTION_DATA)s
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,0 +1,7 @@
+check_PROGRAMS += libpen_log
+
+libpen_log_CXXFLAGS = -std=c++11 -pthread
+
+libpen_log_SOURCES = \
+	test/log/main.cc
+libpen_log_LDADD = libpen.a

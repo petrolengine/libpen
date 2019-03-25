@@ -1,0 +1,9 @@
+third_sources = \
+	3rd/list_sort.c \
+	3rd/llist.c \
+	3rd/rbtree.c
+third_headers = \
+	3rd/list.h \
+	3rd/llist.h \
+	3rd/rbtree.h \
+	3rd/rbtree_augmented.h

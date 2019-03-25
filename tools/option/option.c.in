@@ -1,0 +1,279 @@
+#include <string.h>
+#include <stdio.h>
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+
+#ifdef PEN_WINDOWS
+#include <direct.h>
+#define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+#define GetCurrentDir getcwd
+#endif
+
+#include "option.h"
+
+#ifndef PEN_OPTION_BASE_DIR
+#   define PEN_OPTION_BASE_DIR "."
+#endif
+
+#define FREE(mem) if (mem) { free((char *)mem); mem = NULL; }
+#define PEN_OPTION_ENUM_FUNC(name) __pen_option_enum_func_ ## name
+#define PEN_OPTION_INIT_OBJECT_FUNC(name) \
+                __pen_option_init_object_func_ ## name
+
+const char *appname = "unknown";
+
+%(OPTION_DATA)s
+
+%(OPTION_NAME_TO_ENUM)s
+%(OPTION_INIT_OBJECT_FUNC)s
+
+static inline const char *
+get_app_name(const char *base)
+{
+    const char *p = strrchr(base, '/');
+    return p ? p + 1 : base;
+}
+
+static inline const char *
+__get_default_dir()
+{
+    char buf[FILENAME_MAX] = { 0x00 };
+    assert(GetCurrentDir(buf, FILENAME_MAX));
+    return strdup(buf);
+}
+
+static inline char *
+__get_config_filename(void)
+{
+    char buf[FILENAME_MAX] = { 0x00 };
+    if (snprintf(buf, FILENAME_MAX - 1, "%%s/%%s.conf",
+            PEN_OPTION_BASE_DIR, appname) == FILENAME_MAX)
+    {
+        return NULL;
+    }
+    return strdup(buf);
+}
+
+static inline char *
+__strip(char *str)
+{
+    char *p = str;
+    size_t l;
+
+    while ((isspace(*p)))
+        p++;
+    l = strlen(p);
+    if (p != str)
+        memmove(str, p, l + 1);
+
+    if (l) {
+        p = str + l - 1;
+        while ((isspace(*p)))
+            *p-- = 0;
+    }
+    return str;
+}
+
+static inline void
+__set_value(const char *key, const char *value)
+{
+%(OPTION_SET_VALUE)s
+}
+
+static inline void
+__set_obj_value(const char *name, const char *key, const char *value)
+{
+%(OPTION_SET_OBJ_VALUE)s
+}
+
+static inline void
+__set_array_value(const char *name, size_t idx, const char *value)
+{
+%(OPTION_SET_ARRAY_VALUE)s
+}
+
+static inline void
+__set_array_obj_value(const char *name, size_t idx,
+        const char *key, const char *value)
+{
+%(OPTION_SET_ARRAY_OBJ_VALUE)s
+}
+
+static inline void
+__init_array(const char *name)
+{
+%(OPTION_INIT_ARRAY)s
+}
+
+static inline void
+__init_object(const char *name)
+{
+%(OPTION_INIT_OBJECT)s
+}
+
+static inline void
+__get_key_value(char *line, char **key, char **value)
+{
+    char *p = NULL;
+
+    *key = line;
+    p = strchr(line, '=');
+    assert(p != NULL);
+    *p++ = '\0';
+    *value = p;
+    __strip(*key);
+    __strip(*value);
+
+    assert(strlen(*key) > 0 && strlen(*value) > 0);
+    assert(isalpha((*key)[0]));
+}
+
+static inline char *
+__get_real_value(char *old)
+{
+    char *p = NULL;
+
+    p = strchr(old, ';');
+    assert(p != NULL);
+    *p++ = '\0';
+    __strip(old);
+    return p;
+}
+
+static inline void
+__init_options_from_file(FILE *fp)
+{
+#define PEN_MAX_LINE_LENGTH 102400
+    char *line = calloc(PEN_MAX_LINE_LENGTH + 1, sizeof(char));
+    bool is_obj = false, is_array = false, end_array = false;
+    size_t len = 0, array_idx = 0;
+    char *key = NULL, *value = NULL, *p = NULL, *name = NULL;
+
+    assert(line);
+
+    while (fgets(line, PEN_MAX_LINE_LENGTH, fp)) {
+        assert(line[PEN_MAX_LINE_LENGTH - 1] == '\0');
+        do {
+            __strip(line);
+            len = strlen(line);
+            if (len == 0 || line[0] == '#')
+                break;
+
+            if (is_array) {
+                assert(line[0] != '[');
+                if (line[0] == ']') {
+                    assert(!is_obj);
+                    is_array = false;
+                    end_array = false;
+                    p = line + 1;
+                    FREE(name);
+                    array_idx = 0;
+                } else {
+                    assert(!end_array);
+                    if (is_obj) {
+                        if (line[0] == '}') {
+                            assert(is_obj);
+                            is_obj = false;
+                            p = line + 1;
+                            __strip(p);
+                            if (p[0] != ',')
+                                end_array = true;
+                            else
+                                p ++;
+                            array_idx ++;
+                        } else {
+                            __get_key_value(line, &key, &value);
+                            p = __get_real_value(value);
+                            __set_array_obj_value(name, array_idx, key, value);
+                        }
+                    } else {
+                        if (line[0] == '{') {
+                            assert(!is_obj);
+                            is_obj = true;
+                            p = line + 1;
+                        } else {
+                            __get_key_value(line, &key, &value);
+                            // TODO base type array, set value directly
+                            assert(strcmp("val", key) == 0);
+                            p = __get_real_value(value);
+                            __set_array_value(name, array_idx, value);
+                            array_idx ++;
+                        }
+                    }
+                }
+            } else if (is_obj) {
+                if (line[0] == '}') {
+                    is_obj = false;
+                    p = line + 1;
+                    FREE(name);
+                } else {
+                    __get_key_value(line, &key, &value);
+                    p = __get_real_value(value);
+                    __set_obj_value(name, key, value);
+                }
+            } else {
+                __get_key_value(line, &key, &value);
+
+                if (value[0] == '{') {
+                    is_obj = true;
+                    name = strdup(key);
+                    p = value + 1;
+                    __init_object(key);
+                } else if (value[0] == '[') {
+                    assert(!is_array);
+                    is_array = true;
+                    name = strdup(key);
+                    p = value + 1;
+                    __init_array(key);
+                } else {
+                    p = __get_real_value(value);
+                    __set_value(key, value);
+                }
+            }
+            memmove(line, p, strlen(p) + 1);
+        } while (true);
+    }
+
+    assert(!is_obj && !is_array);
+    free(line);
+#undef PEN_MAX_LINE_LENGTH
+}
+
+PEN_NOTHROW
+PEN_CONSTRUCTOR(PEN_CONSTRUCTOR_OPTION)
+static void
+pen_option_init(int argc, char *argv[])
+{
+    char *config_filename = NULL;
+    FILE *fp = NULL;
+
+    if (argc > 0) {
+        appname = get_app_name(argv[0]);
+    }
+
+    // Init options from file
+    config_filename = __get_config_filename();
+    if (config_filename && (fp = fopen(config_filename, "r")) != NULL) {
+        __init_options_from_file(fp);
+        fclose(fp);
+    } else {
+        errno = 0;
+    }
+    FREE(config_filename)
+    // Set options with args
+
+    if (PEN_OPTION_NAME(log_dir) == NULL) {
+        PEN_OPTION_NAME(log_dir) = __get_default_dir();
+    }
+}
+
+PEN_NOTHROW
+PEN_DESTRUCTOR(PEN_CONSTRUCTOR_OPTION)
+static void
+pen_option_destroy(void)
+{
+%(OPTION_DATA_TO_FREE)s
+}

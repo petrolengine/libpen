@@ -1,0 +1,24 @@
+check_PROGRAMS += libpen_single_mqueue libpen_multi_mqueue libpen_one_mqueue
+
+libpen_single_mqueue_CXXFLAGS = -std=c++11 -pthread
+
+libpen_single_mqueue_SOURCES = \
+	test/mqueue/single.cc
+
+libpen_single_mqueue_LDADD = libpen.a
+
+libpen_multi_mqueue_CXXFLAGS = -std=c++11 -pthread
+
+libpen_multi_mqueue_SOURCES = \
+	test/mqueue/multi.cc
+
+libpen_multi_mqueue_LDADD = libpen.a
+
+libpen_one_mqueue_CXXFLAGS = -std=c++11 -pthread
+
+libpen_one_mqueue_SOURCES = \
+	test/mqueue/one.cc
+
+libpen_one_mqueue_LDADD = libpen.a
+
+noinst_HEADERS += test/mqueue/common.h

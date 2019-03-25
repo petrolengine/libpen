@@ -1,0 +1,8 @@
+include test/connector/include.am
+include test/event/include.am
+include test/gtest/include.am
+include test/listener/include.am
+include test/log/include.am
+include test/mqueue/include.am
+include test/rbtree/include.am
+include test/timer/include.am

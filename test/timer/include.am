@@ -1,0 +1,7 @@
+check_PROGRAMS += libpen_timer
+
+libpen_timer_CFLAGS = -std=gnu11
+
+libpen_timer_SOURCES = \
+	test/timer/main.c
+libpen_timer_LDADD = libpen.a -lpthread

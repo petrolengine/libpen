@@ -1,0 +1,7 @@
+check_PROGRAMS += libpen_listener
+
+libpen_listener_CFLAGS = -std=c11
+
+libpen_listener_SOURCES = \
+	test/listener/main.c
+libpen_listener_LDADD = libpen.a -lpthread

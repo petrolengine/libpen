@@ -1,0 +1,6 @@
+check_PROGRAMS += libpen_event
+
+libpen_event_SOURCES = \
+	test/event/main.c
+
+libpen_event_LDADD = libpen.a

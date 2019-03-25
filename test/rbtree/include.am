@@ -1,0 +1,7 @@
+check_PROGRAMS += libpen_rbtree
+
+libpen_rbtree_CFLAGS = -std=gnu11
+
+libpen_rbtree_SOURCES = \
+	test/rbtree/main.c
+libpen_rbtree_LDADD = libpen.a

@@ -1,0 +1,7 @@
+check_PROGRAMS += libpen_connector
+
+libpen_connector_CFLAGS = -std=gnu11
+
+libpen_connector_SOURCES = \
+	test/connector/main.c
+libpen_connector_LDADD = libpen.a

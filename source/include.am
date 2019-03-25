@@ -1,0 +1,88 @@
+lib_LTLIBRARIES = libpen.la
+lib_LIBRARIES = libpen.a
+
+libpen_la_CPPFLAGS = -shared $(g_cppflags)
+libpen_la_CFLAGS = -std=gnu11
+libpen_la_CXXFLAGS = -std=gnu++11
+libpen_la_LDFLAGS = -version-info 0:0:0 -shared
+libpen_la_LIBADD =
+
+libpen_a_CPPFLAGS = $(g_cppflags)
+libpen_a_CFLAGS = -std=gnu11
+libpen_a_CXXFLAGS = -std=gnu++11
+
+libpen_la_SOURCES = \
+	source/log.c \
+	source/main.c \
+	source/pen_buffer.c \
+	source/pen_callback.c \
+	source/pen_client.c \
+	source/pen_connector.c \
+	source/pen_context.c \
+	source/pen_context_factory.c \
+	source/pen_event_epoll.c \
+	source/pen_event_kqueue.c \
+	source/pen_file_monitor.c \
+	source/pen_listener.c \
+	source/pen_mqueue.c \
+	source/pen_read_tcp.c \
+	source/pen_read_http.c \
+	source/pen_read_internal.c \
+	source/pen_timer.c \
+	source/string_utils.c \
+	$(third_sources)
+libpen_a_SOURCES = $(libpen_la_SOURCES)
+nodist_libpen_la_SOURCES = \
+	source/option.c \
+	source/option.h
+nodist_libpen_a_SOURCES = $(nodist_libpen_la_SOURCES)
+noinst_HEADERS += \
+	source/log.h \
+	source/minheap.h \
+	source/pen_buffer.h \
+	source/pen_callback.h \
+	source/pen_client.h \
+	source/pen_connector.h \
+	source/pen_constructor.h \
+	source/pen_context_factory.h \
+	source/pen_event.h \
+	source/pen_file_monitor.h \
+	source/pen_listener.h \
+	source/pen_mqueue.h \
+	source/pen_read_tcp.h \
+	source/pen_read_http.h \
+	source/pen_read_internal.h \
+	source/pen_threads.h \
+	source/pen_threads_threads.h \
+	source/pen_threads_pthread.h \
+	source/pen_timer.h \
+	source/pen_types.h \
+	source/platform.h \
+	source/sock_utils.h \
+	source/string_utils.h \
+	$(third_headers)
+
+option_c_dep_files = tools/option/auto_gen_option.py \
+					 tools/option/option.c.in \
+					 $(top_srcdir)/conf/my.conf.example
+
+option_h_dep_files = tools/option/auto_gen_option.py \
+					 tools/option/option.h.in \
+					 tools/option/base_type.py
+
+option_conf_dep_files = $(top_srcdir)/source/option.h
+
+$(top_srcdir)/source/option.c: $(option_c_dep_files)
+	@echo generate option.c
+	@python3 $(top_srcdir)/tools/option/auto_gen_option.py c $@
+
+$(top_srcdir)/source/option.h: $(option_h_dep_files)
+	@echo generate option.h
+	@python3 $(top_srcdir)/tools/option/auto_gen_option.py h $@
+
+$(top_srcdir)/conf/my.conf.example: $(option_conf_dep_files)
+	@echo generate my.conf
+	@$(MKDIR) $(top_srcdir)/conf
+	@python3 $(top_srcdir)/tools/option/auto_gen_option.py e $@
+
+source/log.c: $(top_srcdir)/source/option.c

@@ -1,0 +1,11 @@
+includedir = $(prefix)/include/libpen/
+include_HEADERS = \
+	include/log.h \
+	include/pen_callback.h \
+	include/pen_client.h \
+	include/pen_file_monitor.h \
+	include/pen_message.h \
+	include/pen_request_id.h \
+	include/pen_timer.h \
+	include/pen_types.h \
+	include/petrol_engine.h

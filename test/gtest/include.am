@@ -1,0 +1,8 @@
+check_PROGRAMS += libpen_gtest
+
+libpen_gtest_SOURCES = \
+	test/gtest/option.cc \
+	test/gtest/pen_buffer.cc \
+	test/gtest/pen_context_factory.cc
+libpen_gtest_LDADD = libpen.a -lgtest -lgtest_main -lpthread
+libpen_gtest_CPPFLAGS = -std=c++11
