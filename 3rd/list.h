@@ -11,8 +11,8 @@ extern "C" {
 #endif
 
 #define POISON_POINTER_DELTA 0xdead000000000000
-#define LIST_POISON1  ((void *) 0x100 + POISON_POINTER_DELTA)
-#define LIST_POISON2  ((void *) 0x200 + POISON_POINTER_DELTA)
+#define LIST_POISON1  ((void*)((char *) 0x100 + POISON_POINTER_DELTA))
+#define LIST_POISON2  ((void*)((char *) 0x200 + POISON_POINTER_DELTA))
 
 struct list_head {
     struct list_head *next, *prev;
@@ -410,7 +410,7 @@ static inline void list_splice_tail_init(struct list_head *list,
  * @member:    the name of the list_head within the struct.
  */
 #define list_entry(ptr, type, member) \
-    ((type *)((void*)(ptr) - offsetof(type, member)))
+    ((type *)((char*)(ptr) - offsetof(type, member)))
 
 /**
  * list_first_entry - get the first element from a list
@@ -837,7 +837,12 @@ static inline void hlist_move_list(struct hlist_head *old,
 
 void list_sort(void *priv, struct list_head *head,
            int (*cmp)(void *priv, struct list_head *a,
-              struct list_head *b));
+              struct list_head *b))
+#ifdef __GNUC__
+    __attribute__((nothrow))
+    __attribute__((nonnull(2,3)))
+#endif
+    ;
 
 #ifdef __cplusplus
 }

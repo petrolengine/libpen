@@ -2,9 +2,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
-
 #include "pen_listener.h"
 #include "pen_event.h"
 #include "sock_utils.h"
@@ -12,6 +9,12 @@
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 
 #if HAVE_SYS_UN_H
@@ -85,7 +88,7 @@ __do_unix_accept(PenListener_t *pl)
 #if HAVE_SYS_EVENT_H
     while (pl->ctx_.data_size_ --) {
 #else
-        while (true) {
+    while (true) {
 #endif
 #if HAVE_ACCEPT4
         client_fd = accept4(pl->ctx_.fd_, (struct sockaddr*)&cli,
@@ -153,10 +156,19 @@ __init_listener_ctx(PenListener_t *pl)
         abort();
     }
 
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &optval, sizeof(int)) != 0) {
+#ifdef SO_REUSEADDR
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*)&optval, sizeof(int)) != 0) {
         PEN_LOG_ERROR("[listener] set sock opt SO_REUSEPORT error.\n");
         abort();
     }
+#endif
+
+#ifdef SO_REUSEPORT
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, (char*)& optval, sizeof(int)) != 0) {
+		PEN_LOG_ERROR("[listener] set sock opt SO_REUSEPORT error.\n");
+		abort();
+	}
+#endif
 
     pl->ctx_.fd_ = fd;
     pl->ctx_.cb_ = __event_callback;
@@ -211,7 +223,7 @@ __init_unix_listener(
     bzero(&svr, sizeof(svr));
     svr.sun_family = AF_UNIX;
     strcpy(svr.sun_path, cfg->host);
-    unlink(cfg->host);
+    if (unlink(cfg->host) == -1) errno = 0;
     if (bind(pl->ctx_.fd_, (struct sockaddr*)&svr, sizeof(svr)) != 0) {
         PEN_LOG_ERROR("listener '%s' bind '%s' error.\n", cfg->name, cfg->host);
         abort();
@@ -234,7 +246,7 @@ __get_num_of_listeners()
 
     if (PEN_OPTION_NAME(tcp_listener).name != NULL)
         ret ++;
-    ret += PEN_OPTION_NAME(tcp_listeners_size);
+    ret += (uint8_t)PEN_OPTION_NAME(tcp_listeners_size);
 
 #if HAVE_SYS_UN_H
     if (PEN_OPTION_NAME(unix_connector).name != NULL)
@@ -249,10 +261,10 @@ void
 pen_listener_init(PenEvent_t *ev)
 {
     PenListener_t *ptr = NULL;
-
     self.ev_ = ev;
     self.n_listeners_ = __get_num_of_listeners();
     self.pool_ = calloc(self.n_listeners_, sizeof(PenListener_t));
+    
     if (self.pool_ == NULL) {
         PEN_LOG_ERROR("pen listener init error, out of memory.\n");
         abort();

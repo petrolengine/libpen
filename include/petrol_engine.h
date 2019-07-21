@@ -8,8 +8,10 @@ extern "C" {
 #include <stdbool.h>
 #endif
 
-bool petrol_engine_init(int argc, char *argv[]);
-bool petrol_engine_destroy(void);
+#ifdef _MSC_VER
+void petrol_engine_init(int argc, const char *argv[]);
+void petrol_engine_destroy(void);
+#endif
 
 #ifdef __cplusplus
 }

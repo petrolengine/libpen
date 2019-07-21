@@ -116,7 +116,7 @@ static inline void init_llist2_head(struct llist2_head *list)
  * @member:    the name of the llist_node within the struct.
  */
 #define llist_entry(ptr, type, member)        \
-    ((type *)((void*)(ptr) - offsetof(type, member)))
+    ((type *)((char*)(ptr) - offsetof(type, member)))
 
 /**
  * member_address_is_nonnull - check whether the member address is not NULL

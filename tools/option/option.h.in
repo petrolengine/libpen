@@ -17,6 +17,19 @@ extern "C" {
 // Option data
 %(OPTION_DATA)s
 
+static inline PEN_OPTION_ENUM_NAME(sock_type)
+pen_get_sock_type(uint8_t servertype)
+{
+    if (servertype >= PEN_OPTION_NAME(server_types_size))
+        return SOCK_TYPE_TCP;
+    return PEN_OPTION_NAME(server_types)[servertype - 1].socktype;
+}
+
+#ifdef _MSC_VER
+void pen_option_init(int argc, char *argv[])
+void pen_option_destroy(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

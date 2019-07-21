@@ -50,7 +50,7 @@ __pen_callback_set_internal(
     return true;
 }
 
-PenCallbackEvent_t *
+const PenCallbackEvent_t *
 __pen_callback_get_internal(int servertype, int event)
 {
     servertype --;

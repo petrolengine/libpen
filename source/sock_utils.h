@@ -10,8 +10,12 @@ extern "C" {
 
 PEN_NOTHROW
 static inline bool
-pen_set_nonblock(int fd)
+pen_set_nonblock(SOCKET fd)
 {
+#ifdef PEN_WINDOWS
+	u_long flags = 1;
+	return (NO_ERROR == ioctlsocket(fd, FIONBIO, &flags));
+#else
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags == -1)
         return false;
@@ -19,6 +23,7 @@ pen_set_nonblock(int fd)
         return true;
     flags |= O_NONBLOCK;
     return fcntl(fd, F_SETFL, flags) == 0;
+#endif
 }
 
 #ifdef __cplusplus

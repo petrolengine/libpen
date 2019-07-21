@@ -42,12 +42,10 @@ BaseType = {
             "name": {
                 "type": "const char *",
                 "default": "NULL",
-                "todel": True,
             },
             "host": {
                 "type": "const char *",
                 "default": "NULL",
-                "todel": True,
             },
             "port": {
                 "type": "unsigned short int",

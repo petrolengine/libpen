@@ -84,20 +84,20 @@ __set_value(const char *key, const char *value)
 }
 
 static inline void
-__set_obj_value(const char *name, const char *key, const char *value)
+__set_obj_value(const char *key, const char *name, const char *value)
 {
 %(OPTION_SET_OBJ_VALUE)s
 }
 
 static inline void
-__set_array_value(const char *name, size_t idx, const char *value)
+__set_array_value(const char *key, size_t idx, const char *value)
 {
 %(OPTION_SET_ARRAY_VALUE)s
 }
 
 static inline void
-__set_array_obj_value(const char *name, size_t idx,
-        const char *key, const char *value)
+__set_array_obj_value(const char *key, size_t idx,
+        const char *name, const char *value)
 {
 %(OPTION_SET_ARRAY_OBJ_VALUE)s
 }
@@ -244,7 +244,7 @@ __init_options_from_file(FILE *fp)
 
 PEN_NOTHROW
 PEN_CONSTRUCTOR(PEN_CONSTRUCTOR_OPTION)
-static void
+void
 pen_option_init(int argc, char *argv[])
 {
     char *config_filename = NULL;
@@ -272,7 +272,7 @@ pen_option_init(int argc, char *argv[])
 
 PEN_NOTHROW
 PEN_DESTRUCTOR(PEN_CONSTRUCTOR_OPTION)
-static void
+void
 pen_option_destroy(void)
 {
 %(OPTION_DATA_TO_FREE)s

@@ -1,3 +1,5 @@
+#include "log.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -7,10 +9,11 @@
 #include <errno.h>
 #include <stdint.h>
 
+#if HAVE_UNISTD_H
 #include <unistd.h>
-#include <sys/stat.h>
+#endif
 
-#include "log.h"
+#include <sys/stat.h>
 
 
 #define BUFFER_SIZE 10239
@@ -177,17 +180,16 @@ __make_log_base_dir(const char *base_dir)
 
 PEN_NOTHROW
 PEN_CONSTRUCTOR(PEN_CONSTRUCTOR_LOG)
-static void
-pen_log_init()
+void
+pen_log_init(void)
 {
-    assert(access_log_fd == -1);
     __make_log_base_dir(PEN_OPTION_NAME(log_dir));
 }
 
 PEN_NOTHROW
 PEN_DESTRUCTOR(PEN_CONSTRUCTOR_LOG)
-static void
-pen_log_destroy()
+void
+pen_log_destroy(void)
 {
     if (access_log_fd != -1) {
         close(access_log_fd);

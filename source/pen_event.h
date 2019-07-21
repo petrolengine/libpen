@@ -11,6 +11,7 @@ enum {
     PEN_EVENT_WRITE = 0x02,
 #if HAVE_SYS_EVENT_H
     PEN_EVENT_TIMER = 0x08,
+    PEN_EVENT_FILE_MONITOR = 0x10,
 #endif
 };
 

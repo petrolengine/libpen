@@ -59,7 +59,7 @@ __update_timer(PenTimer_t *pt)
     }
 }
 
-#else
+#elif HAVE_SYS_EVENT_H
 
 static inline void
 __update_timer(PenTimer_t *pt)
@@ -73,6 +73,14 @@ __update_timer(PenTimer_t *pt)
         PEN_LOG_ERROR("timer settime error.\n");
         abort();
     }
+}
+
+#else
+
+static inline void
+__update_timer(PenTimer_t* pt)
+{
+	(void)pt;
 }
 
 #endif
@@ -129,13 +137,21 @@ __callback_event(PenEventBase_t *ctx)
     errno = 0;
 }
 
-#else
+#elif HAVE_SYS_EVENT_H
 
 static void
 __callback_event(PenEventBase_t *ctx)
 {
     pen_event_clear_timeout_ev(ctx);
     __do_timeout();
+}
+
+#else
+
+static void
+__callback_event(PenEventBase_t* ctx)
+{
+	(void)ctx;
 }
 
 #endif
@@ -198,12 +214,19 @@ pen_timer_add(int ms, PenTimerCallback_f cb, void *data)
     struct timespec now;
     long nsec = 0;
 
-    if (clock_gettime(CLOCK_REALTIME, &now) == -1) {
-        PEN_LOG_ERROR("get time error.\n");
-        abort();
-    }
+#if HAVE_CLOCK_GETTIME || HAVE_SYS_EVENT_H
+	if (clock_gettime(CLOCK_REALTIME, &now) == -1) {
+		PEN_LOG_ERROR("get time error.\n");
+		abort();
+	}
+#elif HAVE_TIMESPEC_GET
+	if (timespec_get(&now, TIME_UTC) != 0) {
+			PEN_LOG_ERROR("get time error.\n");
+		abort();
+	}
+#endif
 
-    now.tv_nsec /= 1E6;
+    now.tv_nsec /= 1000000;
     pt = pen_context_factory_get(self.cf_);
     min_heap_elem_init(&pt->node_);
     nsec = (now.tv_nsec + ms % 1000) * 1000000;
@@ -249,15 +272,22 @@ pen_timer_update(PenTimer_t *pt, int ms)
     struct timespec now;
     int ret = 0;
 
+#if HAVE_CLOCK_GETTIME || HAVE_SYS_EVENT_H
     if (clock_gettime(CLOCK_REALTIME, &now) == -1) {
         PEN_LOG_ERROR("get time error.\n");
         abort();
     }
+#elif HAVE_TIMESPEC_GET
+	if (timespec_get(&now, TIME_UTC) != 0) {
+		PEN_LOG_ERROR("get time error.\n");
+		abort();
+	}
+#endif
 
     Mtx_lock(&self.mtx_);
 
     pt->node_.tm.tv_sec = now.tv_sec + ms / 1000;
-    pt->node_.tm.tv_nsec = now.tv_nsec + ms % 1000 * 1E6;
+    pt->node_.tm.tv_nsec = now.tv_nsec + ms % 1000 * 1000000;
 
     ret = min_heap_adjust(&self.mh_, &pt->node_);
     if (ret == 0 && !pen_timespec_cmp(pt->node_.tm, self.min_time_, ==))

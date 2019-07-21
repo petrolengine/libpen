@@ -18,7 +18,6 @@ libpen_la_SOURCES = \
 	source/pen_callback.c \
 	source/pen_client.c \
 	source/pen_connector.c \
-	source/pen_context.c \
 	source/pen_context_factory.c \
 	source/pen_event_epoll.c \
 	source/pen_event_kqueue.c \
@@ -55,6 +54,7 @@ noinst_HEADERS += \
 	source/pen_threads.h \
 	source/pen_threads_threads.h \
 	source/pen_threads_pthread.h \
+	source/pen_threads_win.h \
 	source/pen_timer.h \
 	source/pen_types.h \
 	source/platform.h \

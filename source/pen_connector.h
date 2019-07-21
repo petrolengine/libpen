@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platform.h"
+#include "../include/pen_connector.h"
 
 #ifdef __cplusplus
 extern "C" {

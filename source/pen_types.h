@@ -2,9 +2,12 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#if HAVE_STDALIGN_H
 #include <stdalign.h>
+#endif
 #include <stddef.h>
 #include <time.h>
+#include <assert.h>
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -22,12 +25,25 @@ typedef int SOCKET;
 #endif
 
 #elif defined(PEN_WINDOWS)
-
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <io.h>
+#include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
 #   define bzero(ptr, sz) memset(ptr, '\0', sz)
 #ifndef alloca
 #   define alloca _alloca
 #endif
+
+#define F_OK 0
+
+#define strdup _strdup
+#define write _write
+#define access _access
+#define open _open
+#define close _close
+#define read _read
+#define alignof __alignof
 
 #endif
 
@@ -38,7 +54,6 @@ typedef SSIZE_T ssize_t;
 
 typedef struct PenBuffer     PenBuffer_t;
 typedef struct PenMqueue     PenMqueue_t;
-typedef struct PenContext    PenContext_t;
 typedef struct PenEvent      PenEvent_t;
 typedef struct PenEventBase  PenEventBase_t;
 typedef struct PenReaderBase PenReaderBase_t;

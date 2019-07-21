@@ -162,7 +162,6 @@ am__objects_2 = source/libpen_a-log.$(OBJEXT) \
 	source/libpen_a-pen_callback.$(OBJEXT) \
 	source/libpen_a-pen_client.$(OBJEXT) \
 	source/libpen_a-pen_connector.$(OBJEXT) \
-	source/libpen_a-pen_context.$(OBJEXT) \
 	source/libpen_a-pen_context_factory.$(OBJEXT) \
 	source/libpen_a-pen_event_epoll.$(OBJEXT) \
 	source/libpen_a-pen_event_kqueue.$(OBJEXT) \
@@ -186,7 +185,6 @@ am_libpen_la_OBJECTS = source/libpen_la-log.lo \
 	source/libpen_la-pen_callback.lo \
 	source/libpen_la-pen_client.lo \
 	source/libpen_la-pen_connector.lo \
-	source/libpen_la-pen_context.lo \
 	source/libpen_la-pen_context_factory.lo \
 	source/libpen_la-pen_event_epoll.lo \
 	source/libpen_la-pen_event_kqueue.lo \
@@ -302,7 +300,6 @@ am__depfiles_remade = 3rd/$(DEPDIR)/libpen_a-list_sort.Po \
 	source/$(DEPDIR)/libpen_a-pen_callback.Po \
 	source/$(DEPDIR)/libpen_a-pen_client.Po \
 	source/$(DEPDIR)/libpen_a-pen_connector.Po \
-	source/$(DEPDIR)/libpen_a-pen_context.Po \
 	source/$(DEPDIR)/libpen_a-pen_context_factory.Po \
 	source/$(DEPDIR)/libpen_a-pen_event_epoll.Po \
 	source/$(DEPDIR)/libpen_a-pen_event_kqueue.Po \
@@ -321,7 +318,6 @@ am__depfiles_remade = 3rd/$(DEPDIR)/libpen_a-list_sort.Po \
 	source/$(DEPDIR)/libpen_la-pen_callback.Plo \
 	source/$(DEPDIR)/libpen_la-pen_client.Plo \
 	source/$(DEPDIR)/libpen_la-pen_connector.Plo \
-	source/$(DEPDIR)/libpen_la-pen_context.Plo \
 	source/$(DEPDIR)/libpen_la-pen_context_factory.Plo \
 	source/$(DEPDIR)/libpen_la-pen_event_epoll.Plo \
 	source/$(DEPDIR)/libpen_la-pen_event_kqueue.Plo \
@@ -435,9 +431,9 @@ am__DIST_COMMON = $(srcdir)/3rd/include.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/m4/config.sub $(top_srcdir)/m4/depcomp \
 	$(top_srcdir)/m4/install-sh $(top_srcdir)/m4/ltmain.sh \
 	$(top_srcdir)/m4/missing $(top_srcdir)/source/config.h.in \
-	AUTHORS COPYING ChangeLog INSTALL NEWS README m4/ar-lib \
-	m4/compile m4/config.guess m4/config.sub m4/depcomp \
-	m4/install-sh m4/ltmain.sh m4/missing
+	AUTHORS COPYING ChangeLog INSTALL NEWS m4/ar-lib m4/compile \
+	m4/config.guess m4/config.sub m4/depcomp m4/install-sh \
+	m4/ltmain.sh m4/missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -589,18 +585,24 @@ noinst_HEADERS = source/log.h source/minheap.h source/pen_buffer.h \
 	source/pen_mqueue.h source/pen_read_tcp.h \
 	source/pen_read_http.h source/pen_read_internal.h \
 	source/pen_threads.h source/pen_threads_threads.h \
-	source/pen_threads_pthread.h source/pen_timer.h \
-	source/pen_types.h source/platform.h source/sock_utils.h \
-	source/string_utils.h $(third_headers) test/mqueue/common.h
+	source/pen_threads_pthread.h source/pen_threads_win.h \
+	source/pen_timer.h source/pen_types.h source/platform.h \
+	source/sock_utils.h source/string_utils.h $(third_headers) \
+	test/mqueue/common.h
 EXTRA_DIST = tools/option/auto_gen_option.py \
 			 tools/option/base_type.py \
+			 tools/option/gen_data.py \
+			 tools/option/gen_type.py \
+			 tools/option/my_type.py \
 			 tools/option/option.c.in \
-			 tools/option/option.h.in
+			 tools/option/option.h.in \
+			 source/win/config.h
 
 include_HEADERS = \
 	include/log.h \
 	include/pen_callback.h \
 	include/pen_client.h \
+    include/pen_connector.h \
 	include/pen_file_monitor.h \
 	include/pen_message.h \
 	include/pen_request_id.h \
@@ -636,7 +638,6 @@ libpen_la_SOURCES = \
 	source/pen_callback.c \
 	source/pen_client.c \
 	source/pen_connector.c \
-	source/pen_context.c \
 	source/pen_context_factory.c \
 	source/pen_event_epoll.c \
 	source/pen_event_kqueue.c \
@@ -862,8 +863,6 @@ source/libpen_a-pen_client.$(OBJEXT): source/$(am__dirstamp) \
 	source/$(DEPDIR)/$(am__dirstamp)
 source/libpen_a-pen_connector.$(OBJEXT): source/$(am__dirstamp) \
 	source/$(DEPDIR)/$(am__dirstamp)
-source/libpen_a-pen_context.$(OBJEXT): source/$(am__dirstamp) \
-	source/$(DEPDIR)/$(am__dirstamp)
 source/libpen_a-pen_context_factory.$(OBJEXT): source/$(am__dirstamp) \
 	source/$(DEPDIR)/$(am__dirstamp)
 source/libpen_a-pen_event_epoll.$(OBJEXT): source/$(am__dirstamp) \
@@ -916,8 +915,6 @@ source/libpen_la-pen_callback.lo: source/$(am__dirstamp) \
 source/libpen_la-pen_client.lo: source/$(am__dirstamp) \
 	source/$(DEPDIR)/$(am__dirstamp)
 source/libpen_la-pen_connector.lo: source/$(am__dirstamp) \
-	source/$(DEPDIR)/$(am__dirstamp)
-source/libpen_la-pen_context.lo: source/$(am__dirstamp) \
 	source/$(DEPDIR)/$(am__dirstamp)
 source/libpen_la-pen_context_factory.lo: source/$(am__dirstamp) \
 	source/$(DEPDIR)/$(am__dirstamp)
@@ -1103,7 +1100,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_a-pen_callback.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_a-pen_client.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_a-pen_connector.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_a-pen_context.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_a-pen_context_factory.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_a-pen_event_epoll.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_a-pen_event_kqueue.Po@am__quote@ # am--include-marker
@@ -1122,7 +1118,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_la-pen_callback.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_la-pen_client.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_la-pen_connector.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_la-pen_context.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_la-pen_context_factory.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_la-pen_event_epoll.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@source/$(DEPDIR)/libpen_la-pen_event_kqueue.Plo@am__quote@ # am--include-marker
@@ -1260,20 +1255,6 @@ source/libpen_a-pen_connector.obj: source/pen_connector.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='source/pen_connector.c' object='source/libpen_a-pen_connector.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_a_CPPFLAGS) $(CPPFLAGS) $(libpen_a_CFLAGS) $(CFLAGS) -c -o source/libpen_a-pen_connector.obj `if test -f 'source/pen_connector.c'; then $(CYGPATH_W) 'source/pen_connector.c'; else $(CYGPATH_W) '$(srcdir)/source/pen_connector.c'; fi`
-
-source/libpen_a-pen_context.o: source/pen_context.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_a_CPPFLAGS) $(CPPFLAGS) $(libpen_a_CFLAGS) $(CFLAGS) -MT source/libpen_a-pen_context.o -MD -MP -MF source/$(DEPDIR)/libpen_a-pen_context.Tpo -c -o source/libpen_a-pen_context.o `test -f 'source/pen_context.c' || echo '$(srcdir)/'`source/pen_context.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) source/$(DEPDIR)/libpen_a-pen_context.Tpo source/$(DEPDIR)/libpen_a-pen_context.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='source/pen_context.c' object='source/libpen_a-pen_context.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_a_CPPFLAGS) $(CPPFLAGS) $(libpen_a_CFLAGS) $(CFLAGS) -c -o source/libpen_a-pen_context.o `test -f 'source/pen_context.c' || echo '$(srcdir)/'`source/pen_context.c
-
-source/libpen_a-pen_context.obj: source/pen_context.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_a_CPPFLAGS) $(CPPFLAGS) $(libpen_a_CFLAGS) $(CFLAGS) -MT source/libpen_a-pen_context.obj -MD -MP -MF source/$(DEPDIR)/libpen_a-pen_context.Tpo -c -o source/libpen_a-pen_context.obj `if test -f 'source/pen_context.c'; then $(CYGPATH_W) 'source/pen_context.c'; else $(CYGPATH_W) '$(srcdir)/source/pen_context.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) source/$(DEPDIR)/libpen_a-pen_context.Tpo source/$(DEPDIR)/libpen_a-pen_context.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='source/pen_context.c' object='source/libpen_a-pen_context.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_a_CPPFLAGS) $(CPPFLAGS) $(libpen_a_CFLAGS) $(CFLAGS) -c -o source/libpen_a-pen_context.obj `if test -f 'source/pen_context.c'; then $(CYGPATH_W) 'source/pen_context.c'; else $(CYGPATH_W) '$(srcdir)/source/pen_context.c'; fi`
 
 source/libpen_a-pen_context_factory.o: source/pen_context_factory.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_a_CPPFLAGS) $(CPPFLAGS) $(libpen_a_CFLAGS) $(CFLAGS) -MT source/libpen_a-pen_context_factory.o -MD -MP -MF source/$(DEPDIR)/libpen_a-pen_context_factory.Tpo -c -o source/libpen_a-pen_context_factory.o `test -f 'source/pen_context_factory.c' || echo '$(srcdir)/'`source/pen_context_factory.c
@@ -1526,13 +1507,6 @@ source/libpen_la-pen_connector.lo: source/pen_connector.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='source/pen_connector.c' object='source/libpen_la-pen_connector.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_la_CPPFLAGS) $(CPPFLAGS) $(libpen_la_CFLAGS) $(CFLAGS) -c -o source/libpen_la-pen_connector.lo `test -f 'source/pen_connector.c' || echo '$(srcdir)/'`source/pen_connector.c
-
-source/libpen_la-pen_context.lo: source/pen_context.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_la_CPPFLAGS) $(CPPFLAGS) $(libpen_la_CFLAGS) $(CFLAGS) -MT source/libpen_la-pen_context.lo -MD -MP -MF source/$(DEPDIR)/libpen_la-pen_context.Tpo -c -o source/libpen_la-pen_context.lo `test -f 'source/pen_context.c' || echo '$(srcdir)/'`source/pen_context.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) source/$(DEPDIR)/libpen_la-pen_context.Tpo source/$(DEPDIR)/libpen_la-pen_context.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='source/pen_context.c' object='source/libpen_la-pen_context.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_la_CPPFLAGS) $(CPPFLAGS) $(libpen_la_CFLAGS) $(CFLAGS) -c -o source/libpen_la-pen_context.lo `test -f 'source/pen_context.c' || echo '$(srcdir)/'`source/pen_context.c
 
 source/libpen_la-pen_context_factory.lo: source/pen_context_factory.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpen_la_CPPFLAGS) $(CPPFLAGS) $(libpen_la_CFLAGS) $(CFLAGS) -MT source/libpen_la-pen_context_factory.lo -MD -MP -MF source/$(DEPDIR)/libpen_la-pen_context_factory.Tpo -c -o source/libpen_la-pen_context_factory.lo `test -f 'source/pen_context_factory.c' || echo '$(srcdir)/'`source/pen_context_factory.c
@@ -2152,7 +2126,6 @@ distclean: distclean-am
 	-rm -f source/$(DEPDIR)/libpen_a-pen_callback.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_client.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_connector.Po
-	-rm -f source/$(DEPDIR)/libpen_a-pen_context.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_context_factory.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_event_epoll.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_event_kqueue.Po
@@ -2171,7 +2144,6 @@ distclean: distclean-am
 	-rm -f source/$(DEPDIR)/libpen_la-pen_callback.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_client.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_connector.Plo
-	-rm -f source/$(DEPDIR)/libpen_la-pen_context.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_context_factory.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_event_epoll.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_event_kqueue.Plo
@@ -2255,7 +2227,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f source/$(DEPDIR)/libpen_a-pen_callback.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_client.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_connector.Po
-	-rm -f source/$(DEPDIR)/libpen_a-pen_context.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_context_factory.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_event_epoll.Po
 	-rm -f source/$(DEPDIR)/libpen_a-pen_event_kqueue.Po
@@ -2274,7 +2245,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f source/$(DEPDIR)/libpen_la-pen_callback.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_client.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_connector.Plo
-	-rm -f source/$(DEPDIR)/libpen_la-pen_context.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_context_factory.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_event_epoll.Plo
 	-rm -f source/$(DEPDIR)/libpen_la-pen_event_kqueue.Plo

@@ -122,7 +122,7 @@ __pen_context_pool_new(PenContextFactory_t *self)
     pool->mem_ = mem;
     pool->count_ = self->capacity_;
     pool->data_ = (char*)pen_align_ptr(
-            (void*)pool + sizeof(PenContextPool_t), alignof(PenContextItem_t));
+            (char*)pool + sizeof(PenContextPool_t), alignof(PenContextItem_t));
     llist_add(&pool->lnode_, &self->pool_);
     self->capacity_ += self->capacity_;
 
@@ -156,7 +156,7 @@ pen_context_factory_get(PenContextFactory_t *self)
 void
 pen_context_factory_put(PenContextFactory_t *self, void *ctx)
 {
-    PenContextItem_t *item = ctx - sizeof(PenContextItem_t);
+    PenContextItem_t *item = (void*)((char*)ctx - sizeof(PenContextItem_t));
 
     bzero(ctx, self->ctx_size_);
     Mtx_lock(&self->lock_);

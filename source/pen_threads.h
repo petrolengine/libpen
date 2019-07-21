@@ -12,6 +12,8 @@ extern "C" {
 #include "pen_threads_threads.h"
 #elif HAVE_PTHREAD_H
 #include "pen_threads_pthread.h"
+#elif defined(PEN_WINDOWS)
+#include "pen_threads_win.h"
 #endif
 
 #ifdef __cplusplus

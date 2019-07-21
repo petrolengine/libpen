@@ -53,7 +53,24 @@ pen_read_internal(int fd, const char *rest, size_t len)
     if (len > 0)
         memcpy(g_read_buf, rest, len);
 
-    return read(fd, g_read_buf + len, PEN_READ_BUFFER_SIZE - len) + len;
+    return read(fd, g_read_buf + len, PEN_READ_BUFFER_SIZE - len);
+}
+
+void pen_write_tcp(int fd, const void *data, size_t len)
+    PEN_NONNULL(2)
+    PEN_NOTHROW;
+
+static inline void
+pen_write_internal(int fd, int type, const void *data, size_t len)
+{
+    switch (type) {
+        case SOCK_TYPE_TCP:
+            pen_write_tcp(fd, data, len);
+            break;
+
+        default:
+            break;
+    }
 }
 
 #ifdef __cpluspluc

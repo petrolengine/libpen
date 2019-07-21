@@ -49,7 +49,8 @@ LT_INIT
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stddef.h strings.h threads.h pthread.h \
-    unistd.h sys/epoll.h sys/inotify.h sys/un.h sys/event.h sys/timerfd.h])
+    unistd.h sys/epoll.h sys/inotify.h sys/un.h sys/event.h sys/timerfd.h \
+	stdalign.h sys/socket.h netinet/in.h arpa/inet.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -60,6 +61,6 @@ AC_TYPE_UINT32_T
 AC_TYPE_UINT8_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([ctime_r ctime_s mkdir strchr strdup strerror strrchr accept4])
+AC_CHECK_FUNCS([ctime_r ctime_s mkdir strchr strdup strerror strrchr accept4, clock_gettime, timespec_get])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

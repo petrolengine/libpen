@@ -60,15 +60,22 @@ bool
 pen_event_add(PenEvent_t *self, uint32_t event, PenEventBase_t *ctx)
 {
     uint16_t flags = EV_ADD | EV_CLEAR;
+    uint32_t fflags = 0;
+    bool ret = true;
 
     ctx->events_ = event;
 
     if (event & PEN_EVENT_READ)
-        return __set_event(self, ctx, EVFILT_READ, flags, 0, 0);
+        ret &= __set_event(self, ctx, EVFILT_READ, flags, 0, 0);
     if (event & PEN_EVENT_WRITE)
-        return __set_event(self, ctx, EVFILT_WRITE, flags, 0, 0);
+        ret &= __set_event(self, ctx, EVFILT_WRITE, flags, 0, 0);
+    if (event & PEN_EVENT_FILE_MONITOR) {
+        fflags = NOTE_DELETE |  NOTE_WRITE | NOTE_EXTEND
+                | NOTE_ATTRIB | NOTE_LINK | NOTE_RENAME | NOTE_REVOKE;
+        ret &= __set_event(self, ctx, EVFILT_VNODE, flags, fflags, 0);
+    }
 
-    return false;
+    return ret;
 }
 
 bool
@@ -100,12 +107,21 @@ pen_event_del(PenEvent_t *self, PenEventBase_t *ctx)
         return __set_event(self, ctx, EVFILT_READ, EV_DELETE, 0, 0);
     if (ctx->events_ & PEN_EVENT_WRITE)
         return __set_event(self, ctx, EVFILT_WRITE, EV_DELETE, 0, 0);
+    if (ctx->events_ & PEN_EVENT_FILE_MONITOR)
+        return __set_event(self, ctx, EVFILT_VNODE, EV_DELETE, 0, 0);
     return false;
 }
 
 static inline void
 __dispatch_event(KEvent_t *ev, PenEventBase_t *ctx)
 {
+    if (ctx->cb_ == NULL) {
+        PEN_LOG_WARN("unsupport event. flags:\n"
+                     "%hu, filter: %hd, fflags: %u, data: %d\n"
+                     "fd: %d\n",
+                     ev->flags, ev->filter, ev->fflags, (int)ev->data, ctx->fd_);
+        return ;
+    }
 #if PEN_KQUEUE_DEBUG
     PEN_LOG_DEBUG("flags: %hu, filter: %hd, fflags: %u, data: %d\n",
                   ev->flags, ev->filter, ev->fflags, (int)ev->data);
@@ -122,6 +138,12 @@ __dispatch_event(KEvent_t *ev, PenEventBase_t *ctx)
         pen_event_set_write(ctx);
     else if (ev->filter == EVFILT_TIMER)
         pen_event_set_timeout_ev(ctx);
+    else if (ev->filter == EVFILT_VNODE) {
+        if (ev->fflags & NOTE_DELETE)
+            pen_event_set_close(ctx);
+        if (ev->fflags & NOTE_WRITE)
+            pen_event_set_read(ctx);
+    }
     else
         return;
 

@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <3rd/llist.h>
 
 #include "pen_threads.h"
 #include "pen_mqueue.h"
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef PEN_MQUEUE_DEBUG
 #define PEN_MQUEUE_DEBUG 0

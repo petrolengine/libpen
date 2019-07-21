@@ -3,6 +3,7 @@ include_HEADERS = \
 	include/log.h \
 	include/pen_callback.h \
 	include/pen_client.h \
+    include/pen_connector.h \
 	include/pen_file_monitor.h \
 	include/pen_message.h \
 	include/pen_request_id.h \

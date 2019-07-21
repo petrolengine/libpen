@@ -1,15 +1,21 @@
 #include "../include/petrol_engine.h"
+#include <stdio.h>
 
-bool
-petrol_engine_init(int argc, char *argv[])
+#ifdef _MSC_VER
+#include "log.h"
+#include "option.h"
+
+void
+petrol_engine_init(int argc, const char *argv[])
 {
-    (void) argc;
-    (void) argv;
-    return true;
+    pen_log_init(argc, argv);
+    pen_option_init(argc, argv);   
 }
 
-bool
-petrol_engine_destroy()
+void
+petrol_engine_destroy(void)
 {
-    return true;
+
 }
+
+#endif

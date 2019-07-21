@@ -21,7 +21,7 @@ struct PenClient {
     bool is_writeable_;
     bool is_readable_;
     uint8_t server_type_;
-    void *data_;
+    void *user_;
 };
 
 typedef struct PenClientMgr {
@@ -135,7 +135,7 @@ pen_client_add(int fd, uint8_t servertype)
     client->ctx_.cb_ = __event_callback;
     client->reader_.cbs_ = &g_reader_cbs;
     client->server_type_ = servertype;
-    client->data_ = pen_callback_new_client(client, servertype);
+    client->user_ = pen_callback_new_client(client, servertype);
 
     if (!pen_event_add(self.ev_, PEN_EVENT_RDWR, &client->ctx_)) {
         PEN_LOG_ERROR("pen client add event error.\n");
@@ -175,7 +175,13 @@ static void
 __reader_tcp_message_callback(
         PenEventBase_t *ctx, PenTcpHeader_t *hdr, void *data)
 {
-    (void) ctx;
-    (void) hdr;
-    (void) data;
+    PenClient_t *client = PEN_STRUCT_ENTRY(ctx, PenClient_t, ctx_);
+    pen_callback_new_message(client->server_type_, hdr, data, client->user_);
+}
+
+void
+pen_client_send(PenClient_t *client, const void *data, size_t len)
+{
+    pen_write_internal(client->ctx_.fd_,
+                       pen_get_sock_type(client->server_type_), data, len);
 }

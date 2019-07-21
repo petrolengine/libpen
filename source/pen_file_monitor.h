@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 
+#ifndef PEN_FILE_MONITOR_SIZE
+#define PEN_FILE_MONITOR_SIZE 1
+#endif
 
 void pen_file_monitor_init(PenEvent_t *ev)
     PEN_VISIBILITY_INTERNAL

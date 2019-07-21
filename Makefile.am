@@ -10,8 +10,12 @@ g_cppflags = $(warn_flags) -pipe -march=native -DPEN_USE_EPOLL -D_GNU_SOURCE
 noinst_HEADERS =
 EXTRA_DIST = tools/option/auto_gen_option.py \
 			 tools/option/base_type.py \
+			 tools/option/gen_data.py \
+			 tools/option/gen_type.py \
+			 tools/option/my_type.py \
 			 tools/option/option.c.in \
-			 tools/option/option.h.in
+			 tools/option/option.h.in \
+			 source/win/config.h
 
 if OSX
 g_cppflags += -DPEN_OSX

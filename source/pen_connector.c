@@ -2,10 +2,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #include <3rd/list.h>
 
 #include "pen_callback.h"
@@ -13,6 +9,16 @@
 #include "pen_event.h"
 #include "pen_read_internal.h"
 #include "sock_utils.h"
+
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -125,9 +131,7 @@ __do_unix_reconnect(PenConnector_t *conn)
     strcpy(svr.sun_path, cfg->host);
 
     __print_connector(conn, "connecting");
-    if (connect(conn->ctx_.fd_, (struct sockaddr*)&svr, sizeof(svr)) == 0)
-        conn->is_connected_ = true;
-    else
+    if (connect(conn->ctx_.fd_, (struct sockaddr*)&svr, sizeof(svr)) != 0)
         errno = 0;
 }
 
@@ -183,12 +187,13 @@ __do_reconnect(PenConnector_t *conn)
     } else {
         __print_connector(conn, "connect failed");
     }
-    if (!conn->is_unix_)
-        __do_tcp_reconnect(conn);
+
 #if HAVE_SYS_UN_H
-    else
+    if (conn->is_unix_)
         __do_unix_reconnect(conn);
+    else
 #endif
+        __do_tcp_reconnect(conn);
 }
 
 static void
@@ -213,9 +218,9 @@ __event_callback(PenEventBase_t *ctx)
         if (!conn->is_connected_) {
             conn->is_connected_ = true;
             __print_connector(conn, "connected");
+            conn->user_ = pen_callback_connected(__get_connector_server_type(conn),
+                                                 __get_connector_name(conn));
         }
-        conn->user_ = pen_callback_connected(__get_connector_server_type(conn),
-                __get_connector_name(conn));
         // TODO send rest data
     }
 }
@@ -337,10 +342,10 @@ pen_connector_init(PenEvent_t *ev)
     self.ev_ = ev;
     
     PEN_FOREACH_SERVER_TYPES() {
-        num_of_type = __get_num_of_type(i + 1);
+        num_of_type = __get_num_of_type((uint8_t)i + 1);
         if (num_of_type == 0)
             continue;
-        __init_connector_for_type(i + 1, num_of_type);
+        __init_connector_for_type((uint8_t)i + 1, num_of_type);
     }
 }
 
@@ -352,10 +357,7 @@ __do_connector_destroy(PenConnector_t *conn)
         close(conn->ctx_.fd_);
         conn->ctx_.fd_ = INVALID_SOCKET;
     }
-    PEN_LOG_DEBUG("Connector %s destroy.\n"
-            , conn->is_unix_
-            ? ((PEN_OPTION_STRUCT_NAME(unix_connector)*)conn->cfg_)->name
-            : ((PEN_OPTION_STRUCT_NAME(tcp_connector)*)conn->cfg_)->name);
+    PEN_LOG_DEBUG("Connector %s destroy.\n", __get_connector_name(conn));
 }
 
 static inline void
@@ -405,7 +407,55 @@ __reader_tcp_message_callback(
         PenEventBase_t *ctx, PenTcpHeader_t *hdr, void *data)
 {
     PenConnector_t *conn = PEN_STRUCT_ENTRY(ctx, PenConnector_t, ctx_);
-    (void) hdr;
-    (void) data;
-    __print_connector(conn, "new tcp message");
+
+    pen_callback_connect_message(
+            __get_connector_server_type(conn),
+            __get_connector_name(conn),
+            hdr,
+            data,
+            conn->user_);
+}
+
+void
+pen_connector_send(uint8_t tp, const void *data, size_t len)
+{
+    PenConnectorGroup_t *cg = NULL;
+    PenConnector_t *conn = NULL;
+
+    if (self.gc_ == NULL || !PEN_IS_VALIDE_SERVER_TYPES(tp))
+        return;
+
+    cg = self.gc_[tp - 1];
+    if (cg == NULL || cg->size_ == 0)
+        return;
+
+    conn = &cg->conns_[rand() % cg->size_];
+    if (!conn->is_writeable_) {
+        PEN_LOG_ERROR("PenConnector send without writeable.");
+        return;
+    }
+
+    pen_write_internal(conn->ctx_.fd_, pen_get_sock_type(tp), data, len);
+}
+
+void
+pen_connector_broadcast(uint8_t tp, const void *data, size_t len)
+{
+    PenConnectorGroup_t *cg = NULL;
+    PenConnector_t *conn = NULL;
+    PEN_OPTION_ENUM_NAME(sock_type) sp = pen_get_sock_type(tp);
+
+    if (self.gc_ == NULL || !PEN_IS_VALIDE_SERVER_TYPES(tp))
+        return;
+
+    cg = self.gc_[tp - 1];
+    if (cg == NULL || cg->size_ == 0)
+        return;
+
+    for (size_t i = 0; i < cg->size_; i++) {
+        conn = &cg->conns_[i];
+        if (conn->is_writeable_) {
+            pen_write_internal(conn->ctx_.fd_, sp, data, len);
+        }
+    }
 }

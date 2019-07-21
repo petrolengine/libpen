@@ -17,8 +17,8 @@
 #define PEN_CONST __attribute__((__const__))
 #define PEN_PURE __attribute__((__pure__))
 #define PEN_UNUSED __attribute__((unused))
-#define PEN_CONSTRUCTOR(pri) __attribute__((constructor(pri)))
-#define PEN_DESTRUCTOR(pri) __attribute__((destructor(pri)))
+#define PEN_CONSTRUCTOR(pri) __attribute__((constructor(pri))) static
+#define PEN_DESTRUCTOR(pri) __attribute__((destructor(pri))) static
 
 #elif defined(PEN_WINDOWS)
 
@@ -45,6 +45,8 @@
 #include <threads.h>
 #elif defined(__GNUC__)
 #define thread_local __thread
+#elif defined(PEN_WINDOWS)
+#define thread_local __declspec(thread)
 #endif
 
 
@@ -57,7 +59,7 @@
     (t > 0 && t <= PEN_OPTION_NAME(server_types_size))
 
 #define PEN_STRUCT_ENTRY(ptr, type, member)        \
-    ((type *)((void*)(ptr) - offsetof(type, member)))
+    ((type *)((char*)(ptr) - offsetof(type, member)))
 
 #define pen_timespec_cmp(a, b, CMP) \
           (((a).tv_sec == (b).tv_sec) ? \

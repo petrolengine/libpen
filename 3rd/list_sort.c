@@ -31,7 +31,7 @@ static struct list_head *merge(void *priv,
         }
         tail = tail->next;
     }
-    tail->next = a?:b;
+    tail->next = a ? a : b;
     return head.next;
 }
 
@@ -42,6 +42,10 @@ static struct list_head *merge(void *priv,
  * prev-link restoration pass, or maintaining the prev links
  * throughout.
  */
+#ifdef __GNUC__
+__attribute__((nothrow))
+__attribute__((nonnull(1, 2, 3)))
+#endif
 static void merge_and_restore_back_links(void *priv,
                 int (*cmp)(void *priv, struct list_head *a,
                     struct list_head *b),
@@ -64,7 +68,7 @@ static void merge_and_restore_back_links(void *priv,
         }
         tail = tail->next;
     }
-    tail->next = a ? : b;
+    tail->next = a ? a : b;
 
     do {
         /*

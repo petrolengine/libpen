@@ -7,11 +7,6 @@
 #include <unistd.h>
 
 #include "pen_event.h"
-#include "log.h"
-
-#ifndef PEN_FILE_MONITOR_SIZE
-#define PEN_FILE_MONITOR_SIZE 1
-#endif
 
 #define PEN_IN_EVENTS (IN_CLOSE_WRITE | IN_IGNORED)
 
@@ -225,35 +220,6 @@ pen_file_monitor_del(const char *filename)
     free((char*)self.filenames_[idx]);
     self.filenames_[idx] = NULL;
     self.wds_[idx] = 0;
-    return true;
-}
-
-#elif HAVE_SYS_EVENT_H
-
-void
-pen_file_monitor_init(PenEvent_t *ev)
-{
-    (void) ev;
-}
-
-void
-pen_file_monitor_destroy(PenEvent_t *ev)
-{
-    (void) ev;
-}
-
-bool
-pen_file_monitor_add(const char *filename, PenFileMonitorCallback_f cb)
-{
-    (void) filename;
-    (void) cb;
-    return true;
-}
-
-bool
-pen_file_monitor_del(const char *filename)
-{
-    (void) filename;
     return true;
 }
 
